@@ -11,8 +11,6 @@ protocol URLSessionDataTaskProtocol {
     func resume()
 }
 
-extension URLSessionDataTask: URLSessionDataTaskProtocol {}
-
 protocol URLSessionProtocol {
     func dataTask(
         with request: URLRequest,
@@ -20,11 +18,14 @@ protocol URLSessionProtocol {
     ) -> URLSessionDataTaskProtocol
 }
 
+extension URLSessionDataTask: URLSessionDataTaskProtocol {}
+
 extension URLSession: URLSessionProtocol {
     func dataTask(
         with request: URLRequest,
         completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
     ) -> URLSessionDataTaskProtocol {
-        return dataTask(with: request, completionHandler: completionHandler) as URLSessionDataTask
+        let task: URLSessionDataTask = dataTask(with: request, completionHandler: completionHandler)
+        return task
     }
 }
