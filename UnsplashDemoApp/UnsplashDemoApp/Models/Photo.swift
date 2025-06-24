@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Photo: Codable {
+struct Photo: Codable, Hashable {
     let id: String
     let width: Int
     let height: Int
@@ -18,7 +18,7 @@ struct Photo: Codable {
     let urls: PhotoURLs
     let user: User
     
-    struct PhotoURLs: Codable {
+    struct PhotoURLs: Codable, Hashable {
         let raw: String
         let full: String
         let regular: String
@@ -26,7 +26,8 @@ struct Photo: Codable {
         let thumb: String
     }
     
-    struct User: Codable {
+    struct User: Codable, Hashable {
+        let id: String
         let username: String
         let name: String
     }
