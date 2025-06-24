@@ -32,8 +32,9 @@ class HomeViewController: UIViewController {
     
     private func setupBindings() {
         viewModel.onPhotosUpdated = { [weak self] in
+            guard let self else { return }
             DispatchQueue.main.async {
-//                self?.homeView.update(with: self?.viewModel.photos ?? [])
+                self.homeView.update(with: self.viewModel.photos)
             }
         }
         

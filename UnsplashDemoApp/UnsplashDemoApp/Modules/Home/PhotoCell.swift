@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 class PhotoCell: UICollectionViewCell {
     
@@ -39,7 +40,14 @@ class PhotoCell: UICollectionViewCell {
     }
     
     func configure(with photo: Photo) {
-        
+        if let url = URL(string: photo.urls.small) {
+            imageView.kf.setImage(with: url, options: [
+                .cacheOriginalImage
+            ])
+        } else {
+            imageView.image = UIImage(systemName: "photo")?
+                .withTintColor(.secondaryLabel, renderingMode: .alwaysOriginal)
+        }
     }
     
 }

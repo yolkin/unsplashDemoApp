@@ -15,7 +15,9 @@ class MainTabBarController: UITabBarController {
     }
     
     private func setupViewControllers() {
-        let homeVC = HomeViewController()
+        let networkService = NetworkService()
+        let homeViewModel = HomeViewModel(networkService: networkService)
+        let homeVC = HomeViewController(viewModel: homeViewModel)
         homeVC.title = "Photos"
         let homeNavigationController = UINavigationController(rootViewController: homeVC)
         homeNavigationController.tabBarItem = UITabBarItem(

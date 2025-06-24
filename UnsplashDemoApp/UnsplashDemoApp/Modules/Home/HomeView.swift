@@ -46,9 +46,8 @@ class HomeView: UIView {
     fileprivate func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Photo>(
             collectionView: collectionView
-        ) { [weak self] (collectionView, indexPath, photo) in
-            guard let self,
-                  let cell = collectionView.dequeueReusableCell(
+        ) { (collectionView, indexPath, photo) in
+            guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: "PhotoCell",
                     for: indexPath
                   ) as? PhotoCell else {
