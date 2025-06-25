@@ -45,14 +45,30 @@ class PhotoCell: UICollectionViewCell {
     }
     
     func configure(with photo: Photo) {
-        if let url = URL(string: photo.urls.small) {
-            imageView.kf.setImage(with: url, options: [
-                .cacheOriginalImage
-            ])
-        } else {
+        guard let url = URL(string: photo.urls.small) else {
             imageView.image = UIImage(systemName: "photo")?
                 .withTintColor(.secondaryLabel, renderingMode: .alwaysOriginal)
+            return
         }
+        
+        // Using built-in donwsampling from Kingfisher
+        // Kingfisher automatically handles image downsampling for optimal memory usage.
+        // Alternative manual approach using CoreGraphics:
+        // let source = CGImageSourceCreateWithURL(url, nil)
+        // let options = [
+        //   kCGImageSourceCreateThumbnailFromImageAlways: true,
+        //   kCGImageSourceThumbnailMaxPixelSize: maxDimension,
+        //   kCGImageSourceShouldCacheImmediately: true
+        // ] as CFDictionary
+        // let downsampled = CGImageSourceCreateThumbnailAtIndex(source, 0, options)
+        let processor = DownsamplingImageProcessor(size: bounds.size)
+        
+        imageView.kf.setImage(
+            with: url,
+            options: [
+                .processor(processor),
+                .scaleFactor(UIScreen.main.scale)
+            ])
     }
     
 }
