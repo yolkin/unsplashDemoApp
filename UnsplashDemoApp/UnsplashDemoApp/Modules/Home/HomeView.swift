@@ -10,19 +10,11 @@ import UIKit
 class HomeView: UIView {
     enum Section: Int, CaseIterable {
         case main
-        case footer
-    }
-    
-    enum PhotoSectionItem: Hashable {
-        case photo(Photo)
-        case loadingIndicator
     }
     
     private let reuseIdentifier = "PhotoCell"
-    private let loadingReuseIdentifier = "LoadingCell"
-    private var dataSource: UICollectionViewDiffableDataSource<Section, PhotoSectionItem>!
-    
-    private var isLoadingMore = false
+    private let loadingReuseIdentifier = "LoadingView"
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
     weak var collectionViewPrefetchDataSource: UICollectionViewDataSourcePrefetching? {
         get { collectionView.prefetchDataSource }
@@ -35,7 +27,12 @@ class HomeView: UIView {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.register(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        cv.register(LoadingFooterCell.self, forCellWithReuseIdentifier: loadingReuseIdentifier)
+        cv.register(
+            LoadingFooterReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: loadingReuseIdentifier
+            
+        )
         return cv
     }()
     
@@ -76,98 +73,100 @@ class HomeView: UIView {
     }
     
     fileprivate func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, PhotoSectionItem>(
-            collectionView: collectionView
-        ) { (collectionView, indexPath, item) in
-            switch item {
-            case .photo(let photo):
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: self.reuseIdentifier,
+        dataSource = UICollectionViewDiffableDataSource
+        <Section, Photo>(collectionView: collectionView) { [weak self] (collectionView, indexPath, photo) in
+            guard let self,
+                  let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: reuseIdentifier,
                     for: indexPath
-                ) as? PhotoCell else {
-                    fatalError("Could not create PhotoCell")
-                }
-                cell.configure(with: photo)
-                return cell
-            case .loadingIndicator:
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: self.loadingReuseIdentifier,
-                    for: indexPath
-                ) as? LoadingFooterCell else {
-                    fatalError("Could not create LoadingCell")
-                }
-                cell.activityIndicator.startAnimating()
-                return cell
+                  ) as? PhotoCell else {
+                fatalError("Cannot create photo cell")
             }
+            cell.configure(with: photo)
+            return cell
+        }
+        
+        dataSource.supplementaryViewProvider = { [weak self] (collectionView, kind, indexPath) in
+            guard let self,
+                  kind == UICollectionView.elementKindSectionFooter,
+                  let footer = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: loadingReuseIdentifier,
+                    for: indexPath
+                  ) as? LoadingFooterReusableView else {
+                return nil
+            }
+            return footer
         }
     }
     
     // MARK: - Update UI methods
     
     func update(with photos: [Photo], isLoadingMore: Bool) {
-        self.isLoadingMore = isLoadingMore
-        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, PhotoSectionItem>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
         snapshot.appendSections([.main])
+        snapshot.appendItems(photos, toSection: .main)
         
-        let photoItems = photos.map { PhotoSectionItem.photo($0) }
-        snapshot.appendItems(photoItems, toSection: .main)
-        
-        if isLoadingMore {
-            snapshot.appendSections([.footer])
-            snapshot.appendItems([.loadingIndicator], toSection: .footer)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            dataSource.apply(snapshot, animatingDifferences: true)
+            
+            if let footer = collectionView.supplementaryView(
+                forElementKind: UICollectionView.elementKindSectionFooter,
+                at: IndexPath(item: 0, section: 0)
+            ) as? LoadingFooterReusableView {
+                isLoadingMore ? footer.startAnimating() : footer.stopAnimating()
+            }
         }
-        
-        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     func showActivityIndicator(_ show: Bool) {
-        if show {
-            bringSubviewToFront(activityIndicator)
-            activityIndicator.startAnimating()
-        } else {
-            activityIndicator.stopAnimating()
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if show {
+                bringSubviewToFront(activityIndicator)
+                activityIndicator.startAnimating()
+            } else {
+                activityIndicator.stopAnimating()
+            }
         }
+    }
+    
+    func invalidateLayout() {
+        collectionView.collectionViewLayout.invalidateLayout()
     }
 
 }
 
 extension HomeView {
     private func createLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            guard let sectionKind = Section(rawValue: sectionIndex) else { return nil }
-            
-            switch sectionKind {
-            case .main:
-                let itemSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(0.5),
-                    heightDimension: .fractionalHeight(1.0)
-                )
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-                
-                let groupSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .fractionalWidth(0.6)
-                )
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
-                
-                let section = NSCollectionLayoutSection(group: group)
-                return section
-                
-            case .footer:
-                let size = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0),
-                    heightDimension: .absolute(45)
-                )
-                let item = NSCollectionLayoutItem(layoutSize: size)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
-                
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: size, subitems: [item])
-                
-                let section = NSCollectionLayoutSection(group: group)
-                return section
-            }
-        }
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(0.5),
+            heightDimension: .fractionalHeight(1.0)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalWidth(0.6)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
+        
+        let section = NSCollectionLayoutSection(group: group)
+        
+        let footerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(60)
+        )
+        let footer = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: footerSize,
+            elementKind: UICollectionView.elementKindSectionFooter,
+            alignment: .bottom
+        )
+        section.boundarySupplementaryItems = [footer]
+        
+        return UICollectionViewCompositionalLayout(section: section)
     }
 }

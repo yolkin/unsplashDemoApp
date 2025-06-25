@@ -24,6 +24,7 @@ protocol HomeViewModelProtocol {
 final class HomeViewModel: HomeViewModelProtocol {
     private let networkService: NetworkService
     private let perPage = 20
+    private var hasReachedEnd = false
     
     var currentPage = 1
     
@@ -44,7 +45,7 @@ final class HomeViewModel: HomeViewModelProtocol {
     }
     
     func fetchPhotos() {
-        guard !isLoading else { return }
+        guard !isLoading && !hasReachedEnd else { return }
         
         let isInitialLoad = photos.isEmpty || currentPage == 1
         if isInitialLoad {
@@ -62,6 +63,12 @@ final class HomeViewModel: HomeViewModelProtocol {
                 
                 switch result {
                 case .success(let newPhotos):
+                    if newPhotos.isEmpty {
+                        self.hasReachedEnd = true
+                        self.onPhotosUpdated?()
+                        return
+                    }
+                    
                     self.currentPage += 1
                     // Unsplash API sometimes includes duplicates of the last items from the previous page in the next page.
                     // We remove any photos that are already present before appending new ones.

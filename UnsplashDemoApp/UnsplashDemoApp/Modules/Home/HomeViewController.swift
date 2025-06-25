@@ -77,7 +77,8 @@ extension HomeViewController: UICollectionViewDataSourcePrefetching {
     
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         let maxIndex = indexPaths.map { $0.item }.max() ?? 0
-        if maxIndex >= viewModel.photos.count - 5 {
+        let threshold = viewModel.photos.count - 10
+        if maxIndex >= threshold && !viewModel.isLoading {
             viewModel.fetchPhotos()
         }
     }
