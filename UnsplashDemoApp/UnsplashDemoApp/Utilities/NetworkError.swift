@@ -11,4 +11,15 @@ enum NetworkError: Error {
     case invalidURL
     case invalidResponse
     case decodingFailed
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The URL is invalid. Please check the request."
+        case .invalidResponse:
+            return "Received an invalid response from the server."
+        case .decodingFailed:
+            return "Failed to decode the response data."
+        }
+    }
 }
