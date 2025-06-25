@@ -86,7 +86,7 @@ final class NetworkServiceTests: XCTestCase {
     
     func testSearchPhotosSuccess() {
         let mockSession = MockURLSession()
-        mockSession.mockData = mockJSON
+        mockSession.mockData = searchMockJSON
         mockSession.mockResponse = HTTPURLResponse(
             url: URL(string: "https://api.unsplash.com/search/photos")!,
             statusCode: 200,

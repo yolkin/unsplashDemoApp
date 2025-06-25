@@ -21,6 +21,10 @@ class HomeView: UIView {
         set { collectionView.prefetchDataSource = newValue }
     }
     
+    var indexPathsForVisibleItems: [IndexPath] {
+        collectionView.indexPathsForVisibleItems
+    }
+    
     // MARK: - UI Elements
     
     private lazy var collectionView: UICollectionView = {
@@ -131,10 +135,6 @@ class HomeView: UIView {
                 activityIndicator.stopAnimating()
             }
         }
-    }
-    
-    func invalidateLayout() {
-        collectionView.collectionViewLayout.invalidateLayout()
     }
 
 }

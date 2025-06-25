@@ -63,7 +63,7 @@ final class HomeViewModelTests: XCTestCase {
     }
     
     func testSearchPhotosSuccess() {
-        mockSession.mockData = mockJSON
+        mockSession.mockData = searchMockJSON
         mockSession.mockResponse = HTTPURLResponse(
             url: URL(string: "https://api.unsplash.com/search/photos")!,
             statusCode: 200,
@@ -111,6 +111,42 @@ final class HomeViewModelTests: XCTestCase {
         viewModel.isLoading = false
         viewModel.searchPhotos(query: "")
         XCTAssertTrue(viewModel.photos.isEmpty)
+    }
+    
+    func testClearPhotos() {
+        mockSession.mockData = mockJSON
+        mockSession.mockResponse = HTTPURLResponse(
+            url: URL(string: "https://api.unsplash.com/photos")!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+        
+        let fetchExpectation = expectation(description: "Photos updated called")
+        
+        viewModel.onPhotosUpdated = {
+            fetchExpectation.fulfill()
+        }
+        
+        viewModel.fetchPhotos()
+        
+        wait(for: [fetchExpectation], timeout: 1)
+        
+        XCTAssertEqual(viewModel.photos.count, 1)
+        XCTAssertEqual(viewModel.currentPage, 2)
+        
+        viewModel.clearPhotos()
+        
+        XCTAssertTrue(viewModel.photos.isEmpty)
+        XCTAssertEqual(viewModel.currentPage, 1)
+        
+        let delayExpectation = expectation(description: "No async updates after clear")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            XCTAssertTrue(self.viewModel.photos.isEmpty)
+            delayExpectation.fulfill()
+        }
+        
+        wait(for: [delayExpectation], timeout: 1)
     }
     
     func testPhotoAtIndex() {

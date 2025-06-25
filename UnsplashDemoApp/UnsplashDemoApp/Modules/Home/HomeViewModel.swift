@@ -18,6 +18,7 @@ protocol HomeViewModelProtocol {
     
     func fetchPhotos()
     func searchPhotos(query: String)
+    func clearPhotos()
     func photo(at index: Int) -> Photo
 }
 
@@ -35,6 +36,8 @@ final class HomeViewModel: HomeViewModelProtocol {
     
     var onPhotosUpdated: (() -> Void)?
     var onError: ((Error) -> Void)?
+    
+    private var currentTask: URLSessionDataTaskProtocol?
     
     var numberOfPhotos: Int {
         photos.count
@@ -82,33 +85,45 @@ final class HomeViewModel: HomeViewModelProtocol {
             }
         }
     }
+    
     func searchPhotos(query: String) {
-        guard !isLoading, !query.isEmpty else { return }
+        currentTask?.cancel()
+        
+        guard !query.isEmpty else { return }
         
         isLoading = true
         currentPage = 1
         photos.removeAll()
         
-        networkService.searchPhotos(
+        currentTask = networkService.searchPhotos(
             query: query,
             page: currentPage,
             perPage: perPage
         ) { [weak self] result in
-            guard let self = self else { return }
+            guard let self else { return }
             
             DispatchQueue.main.async {
                 self.isLoading = false
+                self.currentTask = nil
                 
                 switch result {
                 case .success(let newPhotos):
                     self.currentPage += 1
                     self.photos = newPhotos
                     self.onPhotosUpdated?()
+                case .failure(let error as NSError) where error.code == NSURLErrorCancelled:
+                    break
                 case .failure(let error):
+                    print(error)
                     self.onError?(error)
                 }
             }
         }
+    }
+    
+    func clearPhotos() {
+        photos.removeAll()
+        currentPage = 1
     }
     
     func photo(at index: Int) -> Photo {

@@ -16,32 +16,42 @@ final class NetworkService {
         self.session = session
     }
     
+    @discardableResult
     func fetchPhotos(
         page: Int,
         perPage: Int,
         completion: @escaping (Result<[Photo], Error>) -> Void
-    ) {
+    ) -> URLSessionDataTaskProtocol? {
         let endpoint = Endpoint.photos(page: page, perPage: perPage)
-        request(endpoint: endpoint, completion: completion)
+        return request(endpoint: endpoint, completion: completion)
     }
     
+    @discardableResult
     func searchPhotos(
         query: String,
         page: Int,
         perPage: Int,
         completion: @escaping (Result<[Photo], Error>) -> Void
-    ) {
+    ) -> URLSessionDataTaskProtocol? {
         let endpoint = Endpoint.search(query: query, page: page, perPage: perPage)
-        request(endpoint: endpoint, completion: completion)
+        return request(endpoint: endpoint) { (result: Result<SearchPhotosResult, Error>) in
+            switch result {
+            case .success(let searchResult):
+                completion(.success(searchResult.results))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
+    @discardableResult
     private func request<T: Decodable>(
         endpoint: Endpoint,
         completion: @escaping (Result<T, Error>) -> Void
-    ) {
+    ) -> URLSessionDataTaskProtocol? {
         guard let request = buildRequest(for: endpoint) else {
             completion(.failure(NetworkError.invalidURL))
-            return
+            return nil
         }
         
         let task = session.dataTask(with: request) { data, response, error in
@@ -53,6 +63,8 @@ final class NetworkService {
             )
         }
         task.resume()
+        
+        return task
     }
     
     private func buildRequest(for endpoint: Endpoint) -> URLRequest? {

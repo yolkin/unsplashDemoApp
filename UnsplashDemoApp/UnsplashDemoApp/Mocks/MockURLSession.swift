@@ -15,6 +15,7 @@ final class MockURLSessionDataTask: URLSessionDataTaskProtocol {
     func resume() {
         closure()
     }
+    func cancel() { }
 }
 
 final class MockURLSession: URLSessionProtocol {

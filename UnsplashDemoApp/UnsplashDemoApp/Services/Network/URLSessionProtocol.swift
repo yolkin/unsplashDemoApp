@@ -9,6 +9,7 @@ import Foundation
 
 protocol URLSessionDataTaskProtocol {
     func resume()
+    func cancel()
 }
 
 protocol URLSessionProtocol {
