@@ -14,6 +14,8 @@ class HomeView: UIView {
     
     private let reuseIdentifier = "PhotoCell"
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
+    
+    // MARK: - UI Elements
 
     private lazy var collectionView: UICollectionView = {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
@@ -21,6 +23,15 @@ class HomeView: UIView {
         cv.register(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         return cv
     }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let ai = UIActivityIndicatorView(style: .large)
+        ai.translatesAutoresizingMaskIntoConstraints = false
+        ai.hidesWhenStopped = true
+        return ai
+    }()
+    
+    // MARK: - Init
     
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
@@ -32,14 +43,20 @@ class HomeView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Setup views
+    
     fileprivate func setupView() {
         addSubview(collectionView)
+        addSubview(activityIndicator)
         
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
     
@@ -58,11 +75,21 @@ class HomeView: UIView {
         }
     }
     
+    // MARK: - Update UI methods
+    
     func update(with photos: [Photo]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
         snapshot.appendSections([.main])
         snapshot.appendItems(photos, toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    func showActivityIndicator(_ show: Bool) {
+        if show {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
     }
 
 }

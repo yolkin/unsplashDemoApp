@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Combine
 
 protocol HomeViewModelProtocol {
     var photos: [Photo] { get }
     var isLoading: Bool { get }
+    var isLoadingPublisher: Published<Bool>.Publisher { get }
     var onPhotosUpdated: (() -> Void)? { get set }
     var onError: ((Error) -> Void)? { get set }
     
@@ -24,7 +26,8 @@ final class HomeViewModel: HomeViewModelProtocol {
     private let perPage = 20
     
     var photos: [Photo] = []
-    var isLoading = false
+    @Published var isLoading = false
+    var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
     
     var onPhotosUpdated: (() -> Void)?
     var onError: ((Error) -> Void)?
@@ -46,15 +49,18 @@ final class HomeViewModel: HomeViewModelProtocol {
             perPage: perPage
         ) { [weak self] result in
             guard let self else { return }
-            self.isLoading = false
             
-            switch result {
-            case .success(let newPhotos):
-                self.currentPage += 1
-                self.photos.append(contentsOf: newPhotos)
-                self.onPhotosUpdated?()
-            case .failure(let error):
-                self.onError?(error)
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let newPhotos):
+                    self.currentPage += 1
+                    self.photos.append(contentsOf: newPhotos)
+                    self.onPhotosUpdated?()
+                case .failure(let error):
+                    self.onError?(error)
+                }
             }
         }
     }
@@ -72,15 +78,18 @@ final class HomeViewModel: HomeViewModelProtocol {
             perPage: perPage
         ) { [weak self] result in
             guard let self = self else { return }
-            self.isLoading = false
             
-            switch result {
-            case .success(let newPhotos):
-                self.currentPage += 1
-                self.photos = newPhotos
-                self.onPhotosUpdated?()
-            case .failure(let error):
-                self.onError?(error)
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let newPhotos):
+                    self.currentPage += 1
+                    self.photos = newPhotos
+                    self.onPhotosUpdated?()
+                case .failure(let error):
+                    self.onError?(error)
+                }
             }
         }
     }

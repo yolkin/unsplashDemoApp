@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import Combine
 
 class HomeViewController: UIViewController {
     private var viewModel: HomeViewModelProtocol
     private let homeView = HomeView()
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init(viewModel: HomeViewModelProtocol) {
         self.viewModel = viewModel
@@ -26,8 +29,15 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupNavigationController()
         setupBindings()
+        homeView.showActivityIndicator(true)
         viewModel.fetchPhotos()
+    }
+    
+    private func setupNavigationController() {
+        title = "Photos"
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     private func setupBindings() {
@@ -39,11 +49,18 @@ class HomeViewController: UIViewController {
         }
         
         viewModel.onError = { [weak self] error in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.showErrorAlert(error)
+                self.showErrorAlert(error)
             }
         }
+        
+        viewModel.isLoadingPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.homeView.showActivityIndicator(isLoading)
+            }
+            .store(in: &cancellables)
     }
-    
 
 }

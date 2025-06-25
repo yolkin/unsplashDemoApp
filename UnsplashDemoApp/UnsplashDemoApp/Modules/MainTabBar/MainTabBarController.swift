@@ -18,7 +18,6 @@ class MainTabBarController: UITabBarController {
         let networkService = NetworkService()
         let homeViewModel = HomeViewModel(networkService: networkService)
         let homeVC = HomeViewController(viewModel: homeViewModel)
-        homeVC.title = "Photos"
         let homeNavigationController = UINavigationController(rootViewController: homeVC)
         homeNavigationController.tabBarItem = UITabBarItem(
             title: "Photos",
@@ -27,7 +26,6 @@ class MainTabBarController: UITabBarController {
         )
         
         let favoritesVC = FavoritesViewController()
-        favoritesVC.title = "Favorites"
         let favoritesNavigationController = UINavigationController(rootViewController: favoritesVC)
         favoritesNavigationController.tabBarItem = UITabBarItem(
             title: "Favorites",
