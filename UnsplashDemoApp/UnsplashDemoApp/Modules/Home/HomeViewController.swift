@@ -14,6 +14,8 @@ class HomeViewController: UIViewController {
     
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - Lifecycle methods
+    
     init(viewModel: HomeViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -31,9 +33,12 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationController()
         setupBindings()
+        homeView.collectionViewPrefetchDataSource = self
         homeView.showActivityIndicator(true)
         viewModel.fetchPhotos()
     }
+    
+    // MARK: - Setup Views
     
     private func setupNavigationController() {
         title = "Photos"
@@ -63,4 +68,15 @@ class HomeViewController: UIViewController {
             .store(in: &cancellables)
     }
 
+}
+
+extension HomeViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        let maxIndex = indexPaths.map { $0.item }.max() ?? 0
+        if maxIndex >= viewModel.photos.count - 5 {
+            viewModel.fetchPhotos()
+        }
+    }
+    
 }

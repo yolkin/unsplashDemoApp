@@ -15,8 +15,13 @@ class HomeView: UIView {
     private let reuseIdentifier = "PhotoCell"
     private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
     
+    weak var collectionViewPrefetchDataSource: UICollectionViewDataSourcePrefetching? {
+        get { collectionView.prefetchDataSource }
+        set { collectionView.prefetchDataSource = newValue }
+    }
+    
     // MARK: - UI Elements
-
+    
     private lazy var collectionView: UICollectionView = {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         cv.translatesAutoresizingMaskIntoConstraints = false
@@ -86,6 +91,7 @@ class HomeView: UIView {
     
     func showActivityIndicator(_ show: Bool) {
         if show {
+            bringSubviewToFront(activityIndicator)
             activityIndicator.startAnimating()
         } else {
             activityIndicator.stopAnimating()

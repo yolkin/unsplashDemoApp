@@ -28,6 +28,11 @@ class PhotoCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView.image = nil
+    }
+    
     fileprivate func setupView() {
         contentView.layer.masksToBounds = true
         contentView.addSubview(imageView)

@@ -56,7 +56,11 @@ final class HomeViewModel: HomeViewModelProtocol {
                 switch result {
                 case .success(let newPhotos):
                     self.currentPage += 1
-                    self.photos.append(contentsOf: newPhotos)
+                    // Unsplash API sometimes includes duplicates of the last items from the previous page in the next page.
+                    // We remove any photos that are already present before appending new ones.
+                    let existingIDs = Set(self.photos.map { $0.id })
+                    let uniqueNewPhotos = newPhotos.filter { !existingIDs.contains($0.id) }
+                    self.photos.append(contentsOf: uniqueNewPhotos)
                     self.onPhotosUpdated?()
                 case .failure(let error):
                     self.onError?(error)
@@ -64,7 +68,6 @@ final class HomeViewModel: HomeViewModelProtocol {
             }
         }
     }
-    
     func searchPhotos(query: String) {
         guard !isLoading, !query.isEmpty else { return }
         
