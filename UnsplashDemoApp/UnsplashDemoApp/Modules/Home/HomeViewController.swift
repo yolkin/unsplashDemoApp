@@ -49,7 +49,10 @@ class HomeViewController: UIViewController {
         viewModel.onPhotosUpdated = { [weak self] in
             guard let self else { return }
             DispatchQueue.main.async {
-                self.homeView.update(with: self.viewModel.photos)
+                self.homeView.update(
+                    with: self.viewModel.photos,
+                    isLoadingMore: self.viewModel.currentPage > 1
+                )
             }
         }
         

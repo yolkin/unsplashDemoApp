@@ -9,6 +9,7 @@ import Foundation
 import Combine
 
 protocol HomeViewModelProtocol {
+    var currentPage: Int { get }
     var photos: [Photo] { get }
     var isLoading: Bool { get }
     var isLoadingPublisher: Published<Bool>.Publisher { get }
@@ -22,10 +23,12 @@ protocol HomeViewModelProtocol {
 
 final class HomeViewModel: HomeViewModelProtocol {
     private let networkService: NetworkService
-    private var currentPage = 1
     private let perPage = 20
     
+    var currentPage = 1
+    
     var photos: [Photo] = []
+    
     @Published var isLoading = false
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
     
@@ -43,7 +46,11 @@ final class HomeViewModel: HomeViewModelProtocol {
     func fetchPhotos() {
         guard !isLoading else { return }
         
-        isLoading = true
+        let isInitialLoad = photos.isEmpty || currentPage == 1
+        if isInitialLoad {
+            isLoading = true
+        }
+        
         networkService.fetchPhotos(
             page: currentPage,
             perPage: perPage

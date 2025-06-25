@@ -62,8 +62,6 @@
 		};
 		11FCAB772E0AAD54001C9A14 /* UnsplashDemoAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = UnsplashDemoAppTests;
 			sourceTree = "<group>";
 		};
@@ -259,8 +257,12 @@
 			);
 			inputFileListPaths = (
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

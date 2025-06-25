@@ -8,12 +8,21 @@
 import UIKit
 
 class HomeView: UIView {
-    enum Section {
+    enum Section: Int, CaseIterable {
         case main
+        case footer
+    }
+    
+    enum PhotoSectionItem: Hashable {
+        case photo(Photo)
+        case loadingIndicator
     }
     
     private let reuseIdentifier = "PhotoCell"
-    private var dataSource: UICollectionViewDiffableDataSource<Section, Photo>!
+    private let loadingReuseIdentifier = "LoadingCell"
+    private var dataSource: UICollectionViewDiffableDataSource<Section, PhotoSectionItem>!
+    
+    private var isLoadingMore = false
     
     weak var collectionViewPrefetchDataSource: UICollectionViewDataSourcePrefetching? {
         get { collectionView.prefetchDataSource }
@@ -26,6 +35,7 @@ class HomeView: UIView {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         cv.translatesAutoresizingMaskIntoConstraints = false
         cv.register(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        cv.register(LoadingFooterCell.self, forCellWithReuseIdentifier: loadingReuseIdentifier)
         return cv
     }()
     
@@ -66,26 +76,48 @@ class HomeView: UIView {
     }
     
     fileprivate func configureDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Section, Photo>(
+        dataSource = UICollectionViewDiffableDataSource<Section, PhotoSectionItem>(
             collectionView: collectionView
-        ) { (collectionView, indexPath, photo) in
-            guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "PhotoCell",
+        ) { (collectionView, indexPath, item) in
+            switch item {
+            case .photo(let photo):
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: self.reuseIdentifier,
                     for: indexPath
-                  ) as? PhotoCell else {
-                fatalError("Could not create new cell")
+                ) as? PhotoCell else {
+                    fatalError("Could not create PhotoCell")
+                }
+                cell.configure(with: photo)
+                return cell
+            case .loadingIndicator:
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: self.loadingReuseIdentifier,
+                    for: indexPath
+                ) as? LoadingFooterCell else {
+                    fatalError("Could not create LoadingCell")
+                }
+                cell.activityIndicator.startAnimating()
+                return cell
             }
-            cell.configure(with: photo)
-            return cell
         }
     }
     
     // MARK: - Update UI methods
     
-    func update(with photos: [Photo]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Photo>()
+    func update(with photos: [Photo], isLoadingMore: Bool) {
+        self.isLoadingMore = isLoadingMore
+        
+        var snapshot = NSDiffableDataSourceSnapshot<Section, PhotoSectionItem>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(photos, toSection: .main)
+        
+        let photoItems = photos.map { PhotoSectionItem.photo($0) }
+        snapshot.appendItems(photoItems, toSection: .main)
+        
+        if isLoadingMore {
+            snapshot.appendSections([.footer])
+            snapshot.appendItems([.loadingIndicator], toSection: .footer)
+        }
+        
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
@@ -102,20 +134,40 @@ class HomeView: UIView {
 
 extension HomeView {
     private func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(0.5),
-            heightDimension: .fractionalHeight(1.0)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalWidth(0.6)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        return UICollectionViewCompositionalLayout(section: section)
+        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            guard let sectionKind = Section(rawValue: sectionIndex) else { return nil }
+            
+            switch sectionKind {
+            case .main:
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(0.5),
+                    heightDimension: .fractionalHeight(1.0)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
+                
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .fractionalWidth(0.6)
+                )
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item])
+                
+                let section = NSCollectionLayoutSection(group: group)
+                return section
+                
+            case .footer:
+                let size = NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .absolute(45)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: size)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
+                
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: size, subitems: [item])
+                
+                let section = NSCollectionLayoutSection(group: group)
+                return section
+            }
+        }
     }
 }
