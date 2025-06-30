@@ -17,17 +17,20 @@ protocol PhotoDetailsViewModelProtocol {
     var isLikedPublisher: Published<Bool>.Publisher { get }
     
     func toggleLike()
+    func checkInitialLikeState()
 }
 
 final class PhotoDetailsViewModel: PhotoDetailsViewModelProtocol {
+    private let storageService: StorageServiceProtocol
     private(set) var photo: Photo
     
     @Published private(set) var isLiked = false
     var isLikedPublisher: Published<Bool>.Publisher { $isLiked }
     
-    init(photo: Photo) {
+    init(photo: Photo, storageService: StorageServiceProtocol = StorageService()) {
         self.photo = photo
-        self.isLiked = photo.likedByUser
+        self.storageService = storageService
+        checkInitialLikeState()
     }
     
     var imageURL: URL? {
@@ -60,7 +63,30 @@ final class PhotoDetailsViewModel: PhotoDetailsViewModelProtocol {
     
     func toggleLike() {
         isLiked.toggle()
-        // save liked photo
+        
+        if isLiked {
+            storageService.saveLikedPhoto(photo)
+        } else {
+            storageService.removeLikedPhoto(id: photo.id)
+        }
+        
+        syncIsLikedState()
     }
     
+    func checkInitialLikeState() {
+        isLiked = storageService.isPhotoLiked(id: photo.id)
+        
+        if photo.likedByUser != isLiked {
+            syncIsLikedState()
+        }
+    }
+    
+}
+
+extension PhotoDetailsViewModel {
+    fileprivate func syncIsLikedState() {
+        var updatedPhoto = photo
+        updatedPhoto.likedByUser = isLiked
+        photo = updatedPhoto
+    }
 }

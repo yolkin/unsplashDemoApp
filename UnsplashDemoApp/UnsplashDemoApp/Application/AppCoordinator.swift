@@ -15,9 +15,11 @@ protocol PhotoDetailsNavigating: AnyObject {
 final class AppCoordinator: PhotoDetailsNavigating {
     private let window: UIWindow
     private var tabBarController: MainTabBarController?
+    private let storageService: StorageServiceProtocol
     
-    init(window: UIWindow) {
+    init(window: UIWindow, storageService: StorageServiceProtocol = StorageService()) {
         self.window = window
+        self.storageService = storageService
     }
     
     func start() {
@@ -30,7 +32,11 @@ final class AppCoordinator: PhotoDetailsNavigating {
     // MARK: - Photo Details Navigating
     
     func showPhotoDetails(for photo: Photo) {
-        let detailsVC = PhotoDetailsViewController(photo: photo)
+        let viewModel = PhotoDetailsViewModel(
+            photo: photo,
+            storageService: storageService
+        )
+        let detailsVC = PhotoDetailsViewController(viewModel: viewModel)
         detailsVC.hidesBottomBarWhenPushed = true
         if let navController = tabBarController?.selectedViewController as? UINavigationController {
             navController.navigationBar.isTranslucent = true

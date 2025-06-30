@@ -17,8 +17,8 @@ class PhotoDetailsViewController: UIViewController {
     
     // MARK: - Lifecycle methods
     
-    init(photo: Photo) {
-        self.viewModel = PhotoDetailsViewModel(photo: photo)
+    init(viewModel: PhotoDetailsViewModelProtocol) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -30,7 +30,6 @@ class PhotoDetailsViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         configureNavigationController()
-        detailsView.configure(with: viewModel)
         setupBindings()
     }
     
@@ -51,6 +50,8 @@ class PhotoDetailsViewController: UIViewController {
             detailsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             detailsView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        detailsView.configure(with: viewModel)
     }
     
     private func configureNavigationController() {

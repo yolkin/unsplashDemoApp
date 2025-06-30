@@ -14,7 +14,7 @@ struct Photo: Codable, Hashable {
     let createdAt: String?
     let description: String?
     let likes: Int
-    let likedByUser: Bool
+    var likedByUser: Bool
     let urls: PhotoURLs
     let user: User
     
