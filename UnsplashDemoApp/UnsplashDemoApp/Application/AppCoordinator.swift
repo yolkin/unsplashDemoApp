@@ -30,6 +30,11 @@ final class AppCoordinator: PhotoDetailsNavigating {
     // MARK: - Photo Details Navigating
     
     func showPhotoDetails(for photo: Photo) {
-        
+        let detailsVC = PhotoDetailsViewController(photo: photo)
+        detailsVC.hidesBottomBarWhenPushed = true
+        if let navController = tabBarController?.selectedViewController as? UINavigationController {
+            navController.navigationBar.isTranslucent = true
+            navController.pushViewController(detailsVC, animated: true)
+        }
     }
 }
