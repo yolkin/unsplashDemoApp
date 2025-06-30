@@ -34,7 +34,7 @@ final class PhotoDetailsViewModel: PhotoDetailsViewModelProtocol {
     }
     
     var imageURL: URL? {
-        URL(string: photo.urls.regular)
+        URL(string: photo.urls.full)
     }
     
     var description: String {

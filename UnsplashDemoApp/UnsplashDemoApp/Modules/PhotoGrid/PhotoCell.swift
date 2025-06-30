@@ -45,7 +45,7 @@ class PhotoCell: UICollectionViewCell {
     }
     
     func configure(with photo: Photo) {
-        guard let url = URL(string: photo.urls.small) else {
+        guard let url = URL(string: photo.urls.regular) else {
             imageView.image = UIImage(systemName: "photo")?
                 .withTintColor(.secondaryLabel, renderingMode: .alwaysOriginal)
             return
