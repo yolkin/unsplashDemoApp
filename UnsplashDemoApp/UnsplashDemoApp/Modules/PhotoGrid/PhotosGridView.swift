@@ -1,5 +1,5 @@
 //
-//  PhotoGridView.swift
+//  PhotosGridView.swift
 //  UnsplashDemoApp
 //
 //  Created by Alexander on 24.06.25.
@@ -7,7 +7,12 @@
 
 import UIKit
 
-class PhotoGridView: UIView {
+class PhotosGridView: UIView {
+    enum Mode {
+        case regular
+        case favorites
+    }
+    
     enum Section: Int, CaseIterable {
         case main
     }
@@ -29,6 +34,8 @@ class PhotoGridView: UIView {
     var indexPathsForVisibleItems: [IndexPath] {
         collectionView.indexPathsForVisibleItems
     }
+    
+    private let mode: Mode
     
     // MARK: - UI Elements
     
@@ -54,7 +61,8 @@ class PhotoGridView: UIView {
     
     // MARK: - Init
     
-    override init(frame: CGRect = .zero) {
+    init(frame: CGRect = .zero, mode: Mode = .regular) {
+        self.mode = mode
         super.init(frame: frame)
         setupView()
         configureDataSource()
@@ -94,6 +102,8 @@ class PhotoGridView: UIView {
             cell.configure(with: photo)
             return cell
         }
+        
+        guard mode == .regular else { return }
         
         dataSource.supplementaryViewProvider = { [weak self] (collectionView, kind, indexPath) in
             guard let self,
@@ -152,7 +162,7 @@ class PhotoGridView: UIView {
 
 }
 
-extension PhotoGridView {
+extension PhotosGridView {
     private func createLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.5),
@@ -169,16 +179,18 @@ extension PhotoGridView {
         
         let section = NSCollectionLayoutSection(group: group)
         
-        let footerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(60)
-        )
-        let footer = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: footerSize,
-            elementKind: UICollectionView.elementKindSectionFooter,
-            alignment: .bottom
-        )
-        section.boundarySupplementaryItems = [footer]
+        if mode == .regular {
+            let footerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(60)
+            )
+            let footer = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: footerSize,
+                elementKind: UICollectionView.elementKindSectionFooter,
+                alignment: .bottom
+            )
+            section.boundarySupplementaryItems = [footer]
+        }
         
         return UICollectionViewCompositionalLayout(section: section)
     }

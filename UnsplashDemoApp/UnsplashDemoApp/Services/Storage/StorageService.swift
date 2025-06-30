@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import Combine
 
 final class StorageService: StorageServiceProtocol {
     private let userDefaults = UserDefaults.standard
     private let likedPhotosKey = "likedPhotosKey"
+    
+    let likedPhotosChanged = PassthroughSubject<Void, Never>()
     
     func saveLikedPhoto(_ photo: Photo) {
         var likedPhotos = getLikedPhotos()
@@ -26,8 +29,11 @@ final class StorageService: StorageServiceProtocol {
     }
     
     func getLikedPhotos() -> [Photo] {
-        guard let data = userDefaults.data(forKey: likedPhotosKey) else { return [] }
-        return (try? JSONDecoder().decode([Photo].self, from: data)) ?? []
+        guard let data = UserDefaults.standard.data(forKey: likedPhotosKey),
+              let photos = try? JSONDecoder().decode([Photo].self, from: data) else {
+            return []
+        }
+        return photos
     }
     
     func isPhotoLiked(id: String) -> Bool {
@@ -36,7 +42,8 @@ final class StorageService: StorageServiceProtocol {
     
     private func save(photos: [Photo]) {
         if let data = try? JSONEncoder().encode(photos) {
-            userDefaults.set(data, forKey: likedPhotosKey)
+            UserDefaults.standard.set(data, forKey: likedPhotosKey)
+            likedPhotosChanged.send()
         }
     }
 }

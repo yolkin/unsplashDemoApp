@@ -1,5 +1,5 @@
 //
-//  HomeViewController.swift
+//  PhotoGridViewController.swift
 //  DemoApp
 //
 //  Created by Alexander on 23.06.25.
@@ -8,9 +8,9 @@
 import UIKit
 import Combine
 
-class HomeViewController: UIViewController {
-    private var viewModel: HomeViewModelProtocol
-    private let photoGridView = PhotoGridView()
+class PhotoGridViewController: UIViewController {
+    private var viewModel: PhotosGridViewModelProtocol
+    private let photoGridView = PhotosGridView()
     
     private weak var navigator: PhotoDetailsNavigating?
     
@@ -22,7 +22,7 @@ class HomeViewController: UIViewController {
     
     // MARK: - Lifecycle methods
     
-    init(viewModel: HomeViewModelProtocol, navigator: PhotoDetailsNavigating) {
+    init(viewModel: PhotosGridViewModelProtocol, navigator: PhotoDetailsNavigating) {
         self.viewModel = viewModel
         self.navigator = navigator
         super.init(nibName: nil, bundle: nil)
@@ -135,7 +135,7 @@ class HomeViewController: UIViewController {
 
 }
 
-extension HomeViewController: UICollectionViewDataSourcePrefetching {
+extension PhotoGridViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         guard searchController.searchBar.text?.isEmpty != false else { return }
         
@@ -147,14 +147,14 @@ extension HomeViewController: UICollectionViewDataSourcePrefetching {
     }
 }
 
-extension HomeViewController: UICollectionViewDelegate {
+extension PhotoGridViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let photo = viewModel.photo(at: indexPath.item)
         navigator?.showPhotoDetails(for: photo)
     }
 }
 
-extension HomeViewController: UISearchResultsUpdating {
+extension PhotoGridViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let query = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) else {
             return
@@ -163,7 +163,7 @@ extension HomeViewController: UISearchResultsUpdating {
     }
 }
 
-extension HomeViewController: UISearchBarDelegate {
+extension PhotoGridViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         performSearch(with: "")
     }

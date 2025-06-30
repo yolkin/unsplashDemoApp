@@ -1,5 +1,5 @@
 //
-//  HomeViewModel.swift
+//  PhotosGridViewModel.swift
 //  DemoApp
 //
 //  Created by Alexander on 23.06.25.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol HomeViewModelProtocol {
+protocol PhotosGridViewModelProtocol {
     var currentPage: Int { get }
     var photos: [Photo] { get }
     var isLoading: Bool { get }
@@ -23,7 +23,7 @@ protocol HomeViewModelProtocol {
     func photo(at index: Int) -> Photo
 }
 
-final class HomeViewModel: HomeViewModelProtocol {
+final class PhotosGridViewModel: PhotosGridViewModelProtocol {
     private let networkService: NetworkService
     private let perPage = 20
     private var hasReachedEnd = false

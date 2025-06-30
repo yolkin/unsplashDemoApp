@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import Combine
 
 protocol StorageServiceProtocol {
+    var likedPhotosChanged: PassthroughSubject<Void, Never> { get }
     func saveLikedPhoto(_ photo: Photo)
     func removeLikedPhoto(id: String)
     func getLikedPhotos() -> [Photo]

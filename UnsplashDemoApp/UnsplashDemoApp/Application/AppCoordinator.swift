@@ -23,7 +23,7 @@ final class AppCoordinator: PhotoDetailsNavigating {
     }
     
     func start() {
-        let tabBarController = MainTabBarController(navigator: self)
+        let tabBarController = MainTabBarController(navigator: self, storageService: storageService)
         self.tabBarController = tabBarController
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()

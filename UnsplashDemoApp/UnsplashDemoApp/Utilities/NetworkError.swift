@@ -11,6 +11,7 @@ enum NetworkError: Error {
     case invalidURL
     case invalidResponse
     case decodingFailed
+    case searchNotAvailable
     
     var errorDescription: String? {
         switch self {
@@ -20,6 +21,8 @@ enum NetworkError: Error {
             return "Received an invalid response from the server."
         case .decodingFailed:
             return "Failed to decode the response data."
+        case .searchNotAvailable:
+            return "Search not available for favorites"
         }
     }
 }

@@ -10,9 +10,11 @@ import UIKit
 final class MainTabBarController: UITabBarController {
     
     private var navigator: PhotoDetailsNavigating
+    private let storageService: StorageServiceProtocol
     
-    init(navigator: PhotoDetailsNavigating) {
+    init(navigator: PhotoDetailsNavigating, storageService: StorageServiceProtocol) {
         self.navigator = navigator
+        self.storageService = storageService
         super.init(nibName: nil, bundle: nil)
         setupViewControllers()
     }
@@ -23,16 +25,22 @@ final class MainTabBarController: UITabBarController {
     
     private func setupViewControllers() {
         let networkService = NetworkService()
-        let homeViewModel = HomeViewModel(networkService: networkService)
-        let homeVC = HomeViewController(viewModel: homeViewModel, navigator: navigator)
-        let homeNavigationController = UINavigationController(rootViewController: homeVC)
-        homeNavigationController.tabBarItem = UITabBarItem(
+        let photosGridViewModel = PhotosGridViewModel(networkService: networkService)
+        let photosGridVC = PhotoGridViewController(
+            viewModel: photosGridViewModel,
+            navigator: navigator
+        )
+        let photosNavigationController = UINavigationController(rootViewController: photosGridVC)
+        photosNavigationController.tabBarItem = UITabBarItem(
             title: "Photos",
             image: UIImage(systemName: "photo.stack"),
             tag: 0
         )
         
-        let favoritesVC = FavoritesViewController()
+        let favoritesVC = FavoritesViewController(
+            storageService: storageService,
+            navigator: navigator
+        )
         let favoritesNavigationController = UINavigationController(rootViewController: favoritesVC)
         favoritesNavigationController.tabBarItem = UITabBarItem(
             title: "Favorites",
@@ -40,7 +48,7 @@ final class MainTabBarController: UITabBarController {
             tag: 1
         )
         
-        setViewControllers([homeNavigationController, favoritesNavigationController], animated: false)
+        setViewControllers([photosNavigationController, favoritesNavigationController], animated: false)
     }
 
 }

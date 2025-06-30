@@ -1,5 +1,5 @@
 //
-//  HomeViewModelTests.swift
+//  PhotosGridViewModelTests.swift
 //  UnsplashDemoAppTests
 //
 //  Created by Alexander on 24.06.25.
@@ -8,17 +8,17 @@
 import XCTest
 @testable import UnsplashDemoApp
 
-final class HomeViewModelTests: XCTestCase {
+final class PhotosGridViewModelTests: XCTestCase {
 
     var mockSession: MockURLSession!
     var networkService: NetworkService!
-    var viewModel: HomeViewModel!
+    var viewModel: PhotosGridViewModel!
     
     override func setUp() {
         super.setUp()
         mockSession = MockURLSession()
         networkService = NetworkService(session: mockSession)
-        viewModel = HomeViewModel(networkService: networkService)
+        viewModel = PhotosGridViewModel(networkService: networkService)
     }
     
     func testFetchPhotosSuccess() {
