@@ -12,6 +12,7 @@ protocol HomeViewModelProtocol {
     var currentPage: Int { get }
     var photos: [Photo] { get }
     var isLoading: Bool { get }
+    var currentQuery: String? { get }
     var isLoadingPublisher: Published<Bool>.Publisher { get }
     var onPhotosUpdated: (() -> Void)? { get set }
     var onError: ((Error) -> Void)? { get set }
@@ -33,6 +34,8 @@ final class HomeViewModel: HomeViewModelProtocol {
     
     @Published var isLoading = false
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
+    
+    var currentQuery: String?
     
     var onPhotosUpdated: (() -> Void)?
     var onError: ((Error) -> Void)?
@@ -94,6 +97,7 @@ final class HomeViewModel: HomeViewModelProtocol {
         isLoading = true
         currentPage = 1
         photos.removeAll()
+        currentQuery = query
         
         currentTask = networkService.searchPhotos(
             query: query,
@@ -124,6 +128,7 @@ final class HomeViewModel: HomeViewModelProtocol {
     func clearPhotos() {
         photos.removeAll()
         currentPage = 1
+        currentQuery = nil
     }
     
     func photo(at index: Int) -> Photo {

@@ -37,6 +37,7 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationController()
         setupSearchController()
+        setupPullToRefresh()
         setupBindings()
         homeView.collectionViewPrefetchDataSource = self
         homeView.showActivityIndicator(true)
@@ -59,6 +60,12 @@ class HomeViewController: UIViewController {
         definesPresentationContext = true
     }
     
+    private func setupPullToRefresh() {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(pullToRefreshHandler), for: .valueChanged)
+        homeView.setRefreshControl(refreshControl)
+    }
+    
     private func setupBindings() {
         viewModel.onPhotosUpdated = { [weak self] in
             guard let self else { return }
@@ -67,6 +74,7 @@ class HomeViewController: UIViewController {
                     with: self.viewModel.photos,
                     isLoadingMore: self.viewModel.currentPage > 1 && self.viewModel.isLoading
                 )
+                self.homeView.endRefreshing()
             }
         }
         
@@ -102,6 +110,18 @@ class HomeViewController: UIViewController {
             } else {
                 viewModel.searchPhotos(query: query)
             }
+        }
+    }
+    
+    // MARK: - Pull to Refresh
+    
+    @objc private func pullToRefreshHandler() {
+        viewModel.clearPhotos()
+        if let query = viewModel.currentQuery, !query.isEmpty {
+            viewModel.searchPhotos(query: query)
+            searchController.searchBar.endEditing(true)
+        } else {
+            viewModel.fetchPhotos()
         }
     }
 

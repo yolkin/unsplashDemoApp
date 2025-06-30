@@ -104,6 +104,10 @@ class HomeView: UIView {
         }
     }
     
+    func setRefreshControl(_ refreshControl: UIRefreshControl) {
+        collectionView.refreshControl = refreshControl
+    }
+    
     // MARK: - Update UI methods
     
     func update(with photos: [Photo], isLoadingMore: Bool) {
@@ -135,6 +139,10 @@ class HomeView: UIView {
                 activityIndicator.stopAnimating()
             }
         }
+    }
+    
+    func endRefreshing() {
+        collectionView.refreshControl?.endRefreshing()
     }
 
 }
