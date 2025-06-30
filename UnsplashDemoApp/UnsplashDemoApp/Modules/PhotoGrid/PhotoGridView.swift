@@ -1,5 +1,5 @@
 //
-//  HomeView.swift
+//  PhotoGridView.swift
 //  UnsplashDemoApp
 //
 //  Created by Alexander on 24.06.25.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeView: UIView {
+class PhotoGridView: UIView {
     enum Section: Int, CaseIterable {
         case main
     }
@@ -152,7 +152,7 @@ class HomeView: UIView {
 
 }
 
-extension HomeView {
+extension PhotoGridView {
     private func createLayout() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.5),

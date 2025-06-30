@@ -10,7 +10,7 @@ import Combine
 
 class HomeViewController: UIViewController {
     private var viewModel: HomeViewModelProtocol
-    private let homeView = HomeView()
+    private let photoGridView = PhotoGridView()
     
     private weak var navigator: PhotoDetailsNavigating?
     
@@ -33,7 +33,7 @@ class HomeViewController: UIViewController {
     }
     
     override func loadView() {
-        view = homeView
+        view = photoGridView
     }
     
     override func viewDidLoad() {
@@ -43,7 +43,7 @@ class HomeViewController: UIViewController {
         setupPullToRefresh()
         setupBindings()
         setupCollectionView()
-        homeView.showActivityIndicator(true)
+        photoGridView.showActivityIndicator(true)
         viewModel.fetchPhotos()
     }
     
@@ -66,23 +66,23 @@ class HomeViewController: UIViewController {
     private func setupPullToRefresh() {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(pullToRefreshHandler), for: .valueChanged)
-        homeView.setRefreshControl(refreshControl)
+        photoGridView.setRefreshControl(refreshControl)
     }
     
     private func setupCollectionView() {
-        homeView.collectionViewPrefetchDataSource = self
-        homeView.collectionViewDelegate = self
+        photoGridView.collectionViewPrefetchDataSource = self
+        photoGridView.collectionViewDelegate = self
     }
     
     private func setupBindings() {
         viewModel.onPhotosUpdated = { [weak self] in
             guard let self else { return }
             DispatchQueue.main.async {
-                self.homeView.update(
+                self.photoGridView.update(
                     with: self.viewModel.photos,
                     isLoadingMore: self.viewModel.currentPage > 1 && self.viewModel.isLoading
                 )
-                self.homeView.endRefreshing()
+                self.photoGridView.endRefreshing()
             }
         }
         
@@ -96,7 +96,7 @@ class HomeViewController: UIViewController {
         viewModel.isLoadingPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
-                self?.homeView.showActivityIndicator(isLoading)
+                self?.photoGridView.showActivityIndicator(isLoading)
             }
             .store(in: &cancellables)
     }
