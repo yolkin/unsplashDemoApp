@@ -8,16 +8,28 @@
 import Foundation
 import UIKit
 
-final class AppCoordinator {
+protocol PhotoDetailsNavigating: AnyObject {
+    func showPhotoDetails(for photo: Photo)
+}
+
+final class AppCoordinator: PhotoDetailsNavigating {
     private let window: UIWindow
+    private var tabBarController: MainTabBarController?
     
     init(window: UIWindow) {
         self.window = window
     }
     
     func start() {
-        let tabBarController = MainTabBarController()
+        let tabBarController = MainTabBarController(navigator: self)
+        self.tabBarController = tabBarController
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
+    }
+    
+    // MARK: - Photo Details Navigating
+    
+    func showPhotoDetails(for photo: Photo) {
+        
     }
 }

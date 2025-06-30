@@ -46,6 +46,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Configuration/Info.plist,
+				Configuration/Secrets.xcconfig,
 			);
 			target = 11FCAB5D2E0AAD51001C9A14 /* UnsplashDemoApp */;
 		};

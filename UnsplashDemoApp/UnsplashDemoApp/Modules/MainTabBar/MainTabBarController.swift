@@ -7,17 +7,24 @@
 
 import UIKit
 
-class MainTabBarController: UITabBarController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
+final class MainTabBarController: UITabBarController {
+    
+    private var navigator: PhotoDetailsNavigating
+    
+    init(navigator: PhotoDetailsNavigating) {
+        self.navigator = navigator
+        super.init(nibName: nil, bundle: nil)
         setupViewControllers()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     private func setupViewControllers() {
         let networkService = NetworkService()
         let homeViewModel = HomeViewModel(networkService: networkService)
-        let homeVC = HomeViewController(viewModel: homeViewModel)
+        let homeVC = HomeViewController(viewModel: homeViewModel, navigator: navigator)
         let homeNavigationController = UINavigationController(rootViewController: homeVC)
         homeNavigationController.tabBarItem = UITabBarItem(
             title: "Photos",

@@ -12,6 +12,8 @@ class HomeViewController: UIViewController {
     private var viewModel: HomeViewModelProtocol
     private let homeView = HomeView()
     
+    private weak var navigator: PhotoDetailsNavigating?
+    
     private var cancellables = Set<AnyCancellable>()
     
     private let searchController = UISearchController(searchResultsController: nil)
@@ -20,8 +22,9 @@ class HomeViewController: UIViewController {
     
     // MARK: - Lifecycle methods
     
-    init(viewModel: HomeViewModelProtocol) {
+    init(viewModel: HomeViewModelProtocol, navigator: PhotoDetailsNavigating) {
         self.viewModel = viewModel
+        self.navigator = navigator
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -39,7 +42,7 @@ class HomeViewController: UIViewController {
         setupSearchController()
         setupPullToRefresh()
         setupBindings()
-        homeView.collectionViewPrefetchDataSource = self
+        setupCollectionView()
         homeView.showActivityIndicator(true)
         viewModel.fetchPhotos()
     }
@@ -64,6 +67,11 @@ class HomeViewController: UIViewController {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(pullToRefreshHandler), for: .valueChanged)
         homeView.setRefreshControl(refreshControl)
+    }
+    
+    private func setupCollectionView() {
+        homeView.collectionViewPrefetchDataSource = self
+        homeView.collectionViewDelegate = self
     }
     
     private func setupBindings() {
@@ -136,6 +144,13 @@ extension HomeViewController: UICollectionViewDataSourcePrefetching {
         if maxIndex >= threshold && !viewModel.isLoading {
             viewModel.fetchPhotos()
         }
+    }
+}
+
+extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let photo = viewModel.photo(at: indexPath.item)
+        navigator?.showPhotoDetails(for: photo)
     }
 }
 

@@ -21,6 +21,11 @@ class HomeView: UIView {
         set { collectionView.prefetchDataSource = newValue }
     }
     
+    weak var collectionViewDelegate: UICollectionViewDelegate? {
+        get { collectionView.delegate }
+        set { collectionView.delegate = newValue }
+    }
+    
     var indexPathsForVisibleItems: [IndexPath] {
         collectionView.indexPathsForVisibleItems
     }
